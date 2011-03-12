@@ -27,6 +27,20 @@ trait MonitorComponent {
     }
     def body: Unit
   }
+  
+  trait SimpleMonitorDevice extends MonitorDevice {
+    def pulsed: Unit
+    def body {
+      react {
+        case Pulse => pulsed
+        case Die => this.exit
+      }
+    }
+  }
+}
+
+trait ListeningComponent[A] {
+  val listener: MonidoListener[A]
 }
 
 trait MonidoListener[A] {
@@ -49,7 +63,8 @@ trait PulsingComponentImpl extends PulsingComponent {
 }
 
 trait FileMonitorImpl extends MonitorComponent {
-  class FileMonitor(listener: MonidoListener[File], area: String) extends MonitorDevice {
+  this: ListeningComponent[File] =>
+  class FileMonitor(area: String) extends MonitorDevice {
     def initiate = {
       val current = new File(area)
       if(!current.exists) 
@@ -85,19 +100,16 @@ trait Monido extends MonitorComponent with PulsingComponentImpl {
   def kill() = pulsar.kill
 }
 
-trait MonidoFactory[A] {
-  def create(what: A, interval: Long, listener: MonidoListener[A]): Monido
-  def apply(what: A, interval: Long) (handler: A => Unit): Monido = {
-    val listener = new MonidoListener[A] {
-      def changed(item: A) = handler(item)
-    }
-    val monido = create(what, interval, listener)
+trait MonidoFactory[A, B] {
+  def create(what: A, interval: Long, handler: B => Unit): Monido
+  def apply(what: A, interval: Long) (handler: B => Unit): Monido = {
+    val monido = create(what, interval, handler)
     monido.start
     monido
   }
 }
 
-object FileMonido extends MonidoFactory[File] {
+object FileMonido extends MonidoFactory[File, File] {
   private def recuresively(dir: File)(body: File => Monido): Unit = {
     val allFiles = dir.listFiles.filter(file => 
                                        !file.getName.startsWith(".") && 
@@ -118,9 +130,12 @@ object FileMonido extends MonidoFactory[File] {
     apply(file, interval)(handler)
   }
 
-  def create(file: File, interval: Long, listener: MonidoListener[File]) =
-    new Monido with FileMonitorImpl {
-      val monitor = new FileMonitor(listener, file.getAbsolutePath)
+  def create(file: File, interval: Long, handler: File => Unit) =
+    new Monido with ListeningComponent[File] with FileMonitorImpl {
+      val listener = new MonidoListener[File] {
+        def changed(item: File) = handler(item)
+      }
+      val monitor = new FileMonitor(file.getAbsolutePath)
       val pulsar = new Pulsar(interval)
     }
 }
