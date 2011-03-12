@@ -7,14 +7,11 @@ package monido
  */
 object Main {
   def main(args: Array[String]) {
-    val monitor = Monido(".")(println) 
+    val recursive = args.size > 0 && args(0) == "-r" 
+    val monitor = FileMonido(".", recurse=recursive)(println) 
 
-    // Never ending
-    val input = Console.readChar
-    if(input == 'q') {
-      Monido.kill(monitor)
-      println("Terminating")
-    }
+    println("Press any key to quit")
+    Console.readLine
   }
 }
 

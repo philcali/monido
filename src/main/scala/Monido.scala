@@ -1,87 +1,127 @@
 package com.github.philcali
 package monido
 
-import scala.actors.Actor
-import Actor.{self, actor}
+import java.util.{Timer, TimerTask}
 import java.io.File
+import scala.actors.Actor
 
-object PullFiles {
-  def unapply(file: File) = {
-    if(file.isDirectory) Some(file.listFiles.filter(!_.getName.startsWith(".")))
-    else Some(Array(file))
+case object Pulse 
+case object Die
+
+trait PulsingComponent {
+  val pulsar: PulsarDevice
+  trait PulsarDevice {
+    def start
+    def kill
   }
 }
 
-case object Watch
-case object Die
-case object Pulse
 
-class Monido(area: String, handler: String => Unit, interval: Long) extends Actor {  
-  initiate(area)
+trait MonitorComponent { 
+  val monitor: MonitorDevice
+  trait MonitorDevice extends Actor {
+    def act() {
+      loop {
+        body
+      }
+    }
+    def body: Unit
+  }
+}
 
-  def act() {
-    this ! Pulse
+trait MonidoListener[A] {
+  def changed(item: A): Unit
+}
 
-    pulse(time, monido) { child => 
-      ? match {
-        case Pulse => child ! Watch 
+trait PulsingComponentImpl extends PulsingComponent {
+  this: MonitorComponent =>
+  class Pulsar(interval: Long) extends PulsarDevice {
+    val timer = new Timer
+    def start = timer.schedule(new TimerTask{
+      def run() = monitor ! Pulse
+    }, 0, interval)
+
+    def kill = {
+      monitor ! Die
+      timer.cancel
+    }
+  }
+}
+
+trait FileMonitorImpl extends MonitorComponent {
+  class FileMonitor(listener: MonidoListener[File], area: String) extends MonitorDevice {
+    def initiate = {
+      val current = new File(area)
+      if(!current.exists) 
+        throw new IllegalArgumentException("%s doesn exist" format(area))
+      
+      current.isDirectory match {
+        case true => files(current)
+        case false => Array(current)
+      }
+    }
+    def files(file: File) = file.listFiles.filter(!_.getName.startsWith(".")) 
+    def transform = initiate.map(file => (file.getName, file.lastModified))
+    def body {
+      val old = transform
+      react {
+        case Pulse => initiate.foreach { file =>
+          old.find(_._1 == file.getName) match {
+            case Some(found) => if(found._2 != file.lastModified) listener.changed(file)
+            case None=> listener.changed(file)
+          }
+        }
         case Die => this.exit
       }
     }
   }
-  
-  def time = System.currentTimeMillis
-
-  private def pulse(start: Long, child: Actor)(body: Actor => Unit) {
-    val now = time
-    if(now >= start + interval) {
-      body(child)
-      pulse(now, monido)(body)
-    } else {
-      pulse(start, child)(body)
-    }
-  }
-
-  private def transform(files: Array[File]) = files.map { file =>
-    (file.getName, file.lastModified)
-  }
-
-  private def initiate(area: String) = {
-    val current = new File(area)
-    
-    if(!current.exists)
-      throw new IllegalArgumentException("%s does not exist" format(area))
-    
-    current
-  }
-
-  private def monitor(old: Array[(String, Long)]) {
-    initiate(area) match {
-      case PullFiles(files) => 
-        files.foreach { file =>
-          old.find(_._1 == file.getName) match {
-            case Some(found) => if(found._2 != file.lastModified) handler(file.getAbsolutePath)
-            case None => handler(file.getAbsolutePath)
-          }
-        }
-    }
-  }
-
-  private def monido = actor{
-    val PullFiles(files) = initiate(area)
-    val transformed = transform(files)
-    self.react {
-      case Watch => monitor(transformed); this ! Pulse
-    }
-  }
 }
 
-object Monido {
-  def apply(area: String, interval: Long = 100)(f: String => Unit) = {
-    val monido = new Monido(area, f, interval)
+trait Monido extends MonitorComponent with PulsingComponentImpl {
+  def start() = {
+    monitor.start
+    pulsar.start
+  }
+  def kill() = pulsar.kill
+}
+
+trait MonidoFactory[A] {
+  def create(what: A, interval: Long, listener: MonidoListener[A]): Monido
+  def apply(what: A, interval: Long) (handler: A => Unit): Monido = {
+    val listener = new MonidoListener[A] {
+      def changed(item: A) = handler(item)
+    }
+    val monido = create(what, interval, listener)
     monido.start
-    monido 
+    monido
+  }
+}
+
+object FileMonido extends MonidoFactory[File] {
+  private def recuresively(dir: File)(body: File => Monido): Unit = {
+    val allFiles = dir.listFiles.filter(file => 
+                                       !file.getName.startsWith(".") && 
+                                        file.isDirectory)
+    allFiles.foreach { file => 
+      body(file)
+      recuresively(file)(body)
+    }
   }
 
-  def kill(monido: Monido) = monido ! Die
+  def apply(area: String, interval: Long = 500, recurse: Boolean = false) (handler: File => Unit): Monido = {
+    val file = new File(area)
+    if(recurse && file.isDirectory) {
+      recuresively(file) { file =>
+        apply(file, interval)(handler)
+      }
+    }
+    apply(file, interval)(handler)
+  }
+
+  def create(file: File, interval: Long, listener: MonidoListener[File]) =
+    new Monido with FileMonitorImpl {
+      val monitor = new FileMonitor(listener, file.getAbsolutePath)
+      val pulsar = new Pulsar(interval)
+    }
 }
+
