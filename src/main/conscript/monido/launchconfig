@@ -1,0 +1,10 @@
+[app]
+  version: 0.0.1
+  org: com.github.philcali
+  name: monido
+  class: com.github.philcali.monido.Main
+[scala]
+  version: 2.8.0
+[repositories]
+  local
+  maven-local
