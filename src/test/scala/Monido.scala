@@ -34,9 +34,9 @@ class MonidoSpec extends FlatSpec with ShouldMatchers with BeforeAndAfterAll {
 
   "Monido" should "monitor the temp directory" in {
     val base = new File("temp").getAbsolutePath
-    val monitor = Monido("temp") { path =>
+    val monitor = FileMonido("temp") { path =>
       println(path)
-      path should be === "%s/file2.txt".format(base)
+      path.getAbsolutePath should be === "%s/file2.txt".format(base)
     }
 
     Thread.sleep(1000)
@@ -46,13 +46,13 @@ class MonidoSpec extends FlatSpec with ShouldMatchers with BeforeAndAfterAll {
     }
   
     // Hold this thread for a second
-    val now = monitor.time
+    def time = System.currentTimeMillis 
+    val now = time
     def loopUntil(cond: => Boolean) { 
       if(!cond) loopUntil(cond)
     }
 
-    loopUntil(monitor.time >= now + 500)
-    Monido.kill(monitor)
-    loopUntil(monitor.time >= now + 1000)
+    loopUntil(time >= now + 1000)
+    monitor.kill
   }
 }
