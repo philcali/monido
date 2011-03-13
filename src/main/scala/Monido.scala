@@ -1,66 +1,7 @@
 package com.github.philcali
 package monido
 
-import java.util.{Timer, TimerTask}
 import java.io.File
-import scala.actors.Actor
-
-case object Pulse 
-case object Die
-
-trait PulsingComponent {
-  val pulsar: PulsarDevice
-  trait PulsarDevice {
-    def start
-    def kill
-  }
-}
-
-
-trait MonitorComponent { 
-  val monitor: MonitorDevice
-  trait MonitorDevice extends Actor {
-    def act() {
-      loop {
-        body
-      }
-    }
-    def body: Unit
-  }
-  
-  trait SimpleMonitorDevice extends MonitorDevice {
-    def pulsed: Unit
-    def body {
-      react {
-        case Pulse => pulsed
-        case Die => this.exit
-      }
-    }
-  }
-}
-
-trait ListeningComponent[A] {
-  val listener: MonidoListener[A]
-}
-
-trait MonidoListener[A] {
-  def changed(item: A): Unit
-}
-
-trait PulsingComponentImpl extends PulsingComponent {
-  this: MonitorComponent =>
-  class Pulsar(interval: Long) extends PulsarDevice {
-    val timer = new Timer
-    def start = timer.schedule(new TimerTask{
-      def run() = monitor ! Pulse
-    }, 0, interval)
-
-    def kill = {
-      monitor ! Die
-      timer.cancel
-    }
-  }
-}
 
 trait FileMonitorImpl extends MonitorComponent {
   this: ListeningComponent[File] =>
@@ -92,23 +33,6 @@ trait FileMonitorImpl extends MonitorComponent {
   }
 }
 
-trait Monido extends MonitorComponent with PulsingComponentImpl {
-  def start() = {
-    monitor.start
-    pulsar.start
-  }
-  def kill() = pulsar.kill
-}
-
-trait MonidoFactory[A, B] {
-  def create(what: A, interval: Long, handler: B => Unit): Monido
-  def apply(what: A, interval: Long) (handler: B => Unit): Monido = {
-    val monido = create(what, interval, handler)
-    monido.start
-    monido
-  }
-}
-
 object FileMonido extends MonidoFactory[File, File] {
   private def recuresively(dir: File)(body: File => Monido): Unit = {
     val allFiles = dir.listFiles.filter(file => 
@@ -131,7 +55,9 @@ object FileMonido extends MonidoFactory[File, File] {
   }
 
   def create(file: File, interval: Long, handler: File => Unit) =
-    new Monido with ListeningComponent[File] with FileMonitorImpl {
+    new Monido with ListeningComponent[File] 
+               with FileMonitorImpl 
+               with PulsingComponentImpl {
       val listener = new MonidoListener[File] {
         def changed(item: File) = handler(item)
       }
