@@ -10,7 +10,7 @@ import java.io.{BufferedReader, InputStreamReader}
  */
 object Main {
   def printHelp {
-    println("monido [-rh] [file|dir] [-e=<command>]")
+    println("Usage: monido [-rh] [file|dir] [-e <command>]")
     def padleft(s: String) = "  %s" format(s)
     val text = List("-h         prints this help",
                     "-r         spawns recursive file monitor",
@@ -19,13 +19,14 @@ object Main {
     text.map(padleft).foreach(println)
   }
 
-  val Exec = """-e=(.+)""".r
+  val Exec = """-e\s+(.+)""".r
 
   def doIt(args: Array[String]) {
     val help = args.contains("-h")
     val recursive = args.contains("-r")
-    val command = args.find(_.startsWith("-e")) match {
-      case Some(Exec(cmd)) => 
+    val idx = args.findIndexOf(_ == "-e")
+    val command = args.takeRight(args.size - idx).mkString(" ") match {
+      case Exec(cmd) => 
         (file: File) => {
           val rt = Runtime.getRuntime()
           val pr = rt.exec("%s %s" format(cmd, file.getAbsolutePath))
@@ -36,7 +37,7 @@ object Main {
           }
           read(in)
         }
-      case None => (file: File) => println(file)
+      case _ => (file: File) => println(file)
     }
     val dir = args.find(!_.startsWith("-")) match {
       case Some(a) => 
