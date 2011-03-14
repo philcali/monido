@@ -32,5 +32,16 @@ of a change (or anything else really) by making use of the `ListeningComponent`.
 
 Lots of moving parts that have arbitrary dependencies make it a great candidate for some DI.
 
+## Installation
+
+The Monido project has been conscripted, so a simple:
+    
+    git clone git://github.com/philcali/monido.git; cd monido
+    sbt update publish-local
+    cs philcali/monido
+
+Is all that's needed to install it. Now you can do things like:
+
+    monido some/path -e ls -l
 
 [cake pattern]: http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di.html
