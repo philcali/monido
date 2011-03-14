@@ -17,12 +17,8 @@ object Main {
     text.map(padleft).foreach(println)
   }
 
-  def main(args: Array[String]) {
-    if(args.contains("-h")) {
-      printHelp
-      exit(0)
-    }
-
+  def doIt(args: Array[String]) {
+    val help = args.contains("-h")
     val recursive = args.contains("-r")
     val dir = args.find(!_.startsWith("-")) match {
       case Some(a) => 
@@ -30,12 +26,28 @@ object Main {
         if(file.exists) file else new File(".")
       case None => new File(".")
     }
-   
-    val monitor = FileMonido(dir.getAbsolutePath, recurse=recursive)(println) 
 
-    println("Press Enter to quit")
-    Console.readLine
-    monitor.kill
+    if(help) { 
+      printHelp
+    } else { 
+      val monitor = FileMonido(dir.getAbsolutePath, recurse=recursive)(println)
+      println("Press Enter to quit")
+      Console.readLine
+      monitor.kill
+    }
+  }
+
+  def main(args: Array[String]) {
+    doIt(args)
+  }
+}
+
+class Main extends xsbti.AppMain {
+  class Exit(val code: Int) extends xsbti.Exit 
+  
+  def run(config: xsbti.AppConfiguration) = {
+    Main.doIt(config.arguments)
+    new Exit(0) 
   }
 }
 
