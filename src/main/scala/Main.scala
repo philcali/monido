@@ -1,13 +1,21 @@
+/**
+# Monido
+
+Monido comes with a command line program that spits out changes in a shell
+It uses the main framework code, but can also be a stand alone program.
+
+Install the program using n8han's conscript tool:
+
+ - `cs philcali/monido`
+ - `monido . -e ls -l`
+
+*/
 package com.github.philcali
 package monido
 
 import java.io.File
 import java.io.{BufferedReader, InputStreamReader}
 
-/**
- * Monido comes with a command line program that spits out changes in a shell
- * It uses the main framework code, but can also be a stand alone program.
- */
 object Main {
   def printHelp {
     println("Usage: monido [-rh] [file|dir] [-e <command>]")
@@ -19,6 +27,7 @@ object Main {
     text.map(padleft).foreach(println)
   }
 
+  // Parse out the terminal execution
   val Exec = """-e\s+(.+)""".r
 
   def doIt(args: Array[String]) {
@@ -29,6 +38,7 @@ object Main {
       case Exec(cmd) => 
         (file: File) => {
           val rt = Runtime.getRuntime()
+          // Execute the terminal command
           val pr = rt.exec("%s %s" format(cmd, file.getAbsolutePath))
           val in = new BufferedReader(new InputStreamReader(pr.getInputStream))
           def read(in: BufferedReader): Unit = in.readLine match {
@@ -49,7 +59,8 @@ object Main {
 
     if(help) { 
       printHelp
-    } else { 
+    } else {
+      // Standard `FileMonido` behavior  
       val monitor = FileMonido(dir.getAbsolutePath, recurse=recursive)(command)
       println("Press Enter to quit")
       Console.readLine
@@ -62,6 +73,7 @@ object Main {
   }
 }
 
+// Conscripted execuation
 class Main extends xsbti.AppMain {
   class Exit(val code: Int) extends xsbti.Exit 
   

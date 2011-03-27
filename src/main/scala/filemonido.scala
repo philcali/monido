@@ -1,3 +1,10 @@
+/**
+# FileMonido
+
+A `FileMonido` is a mondio reference implementation that monitors a file or
+folder on the filesystem. It can be initiated recursivley, but this can be a
+dangerous prospect, as each monido consumes two threads.
+*/
 package com.github.philcali
 package monido
 
@@ -6,6 +13,7 @@ import java.io.File
 trait FileMonitorImpl extends MonitorComponent {
   this: ListeningComponent[File] =>
   class FileMonitor(area: String) extends MonitorDevice {
+    // Require the existence of the file or filder we are monitoring.
     def initiate = {
       val current = new File(area)
       if(!current.exists) 
@@ -18,6 +26,7 @@ trait FileMonitorImpl extends MonitorComponent {
     }
     def files(file: File) = file.listFiles.filter(!_.getName.startsWith(".")) 
     def transform = initiate.map(file => (file.getName, file.lastModified))
+    // Using `Actor` loop for storing *old* files
     def body {
       val old = transform
       react {
