@@ -1,6 +1,7 @@
 import sbt._
 
 import Keys._
+import CxDocco._
 
 object General {
   val settings = Defaults.defaultSettings ++ Seq (
@@ -15,8 +16,8 @@ object Monido extends Build {
   lazy val monido = Project (
     "monido",
     file("."),
-    settings = General.settings ++ Seq (
-      CxDocco.doccoTitle := "Monido Monitoring Service"
+    settings = General.settings ++ doccoSettings ++ Seq (
+      doccoTitle := "Monido Monitoring Service"
     )
   ) aggregate (app, core)
 

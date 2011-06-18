@@ -1,1 +1,1 @@
-libraryDependencies += "com.github.philcali" %% "sbt-cx-docco" % "0.0.2"
+libraryDependencies += "com.github.philcali" %% "sbt-cx-docco" % "0.0.3"
