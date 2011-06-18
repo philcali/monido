@@ -1,21 +1,20 @@
-/**
-# Monido
-
-Monido comes with a command line program that spits out changes in a shell
-It uses the main framework code, but can also be a stand alone program.
-
-Install the program using n8han's conscript tool:
-
- - `cs philcali/monido`
- - `monido . -e ls -l`
-
-*/
 package com.github.philcali
 package monido
 
 import java.io.File
 import java.io.{BufferedReader, InputStreamReader}
 
+/*!# Monido
+
+Monido comes with a command line program that spits out changes in a shell
+It uses the main framework code, but can also be a stand alone program.
+
+Install the program using n8han's conscript tool:
+
+ * `cs philcali/monido`
+ * `monido . -e ls -l`
+
+*/
 object Main {
   def printHelp {
     println("Usage: monido [-rh] [file|dir] [-e <command>]")
