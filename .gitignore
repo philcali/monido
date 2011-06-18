@@ -1,0 +1,6 @@
+.DS*
+lib*
+target
+boot
+project/plugins/project
+project/plugins/src*
