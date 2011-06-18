@@ -16,9 +16,9 @@ object Monido extends Build {
     "monido",
     file("."),
     settings = General.settings ++ Seq (
-      doccoTitle := "Monido Monitoring Service"
+      CxDocco.doccoTitle := "Monido Monitoring Service"
     )
-  ) aggregates (core, app)
+  ) aggregate (app, core)
 
   lazy val core = Project (
     "monido-core",
@@ -41,5 +41,5 @@ object Monido extends Build {
         "org.scala-tools.sbt" % "launcher-interface" % "0.7.5" % "provided" from
         "http://databinder.net/repo/org.scala-tools.sbt/launcher-interface/0.7.5/jars/launcher-interface.jar"
     )
-  )
+  ) dependsOn (core)
 }
