@@ -1,5 +1,5 @@
 [app]
-  version: 0.0.1
+  version: 0.0.2
   org: com.github.philcali
   name: monido
   class: com.github.philcali.monido.Main
@@ -8,3 +8,5 @@
 [repositories]
   local
   maven-local
+  scala-tools-releases
+  maven-central
