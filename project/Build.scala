@@ -7,7 +7,7 @@ object General {
   val settings = Defaults.defaultSettings ++ Seq (
     organization := "com.github.philcali",
     scalaVersion := "2.9.0",
-    crossScalaVersions := Seq("2.9.0-1", "2.9.0", "2.8.1", "2.8.0"),
+    crossScalaVersions := Seq("2.9.0", "2.8.1", "2.8.0"),
     version := "0.0.2"
   )
 }

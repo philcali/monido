@@ -1,7 +1,7 @@
 [app]
   version: 0.0.2
   org: com.github.philcali
-  name: monido
+  name: monido-app
   class: com.github.philcali.monido.Main
 [scala]
   version: 2.8.1
