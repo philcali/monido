@@ -8,7 +8,7 @@ object General {
     organization := "com.github.philcali",
     scalaVersion := "2.9.0",
     crossScalaVersions := Seq("2.9.0", "2.8.1", "2.8.0"),
-    version := "0.0.2"
+    version := "0.0.3"
   )
 }
 
@@ -39,8 +39,7 @@ object Monido extends Build {
     file("app"),
     settings = General.settings ++ Seq (
       libraryDependencies +=
-        "org.scala-tools.sbt" % "launcher-interface" % "0.7.5" % "provided" from
-        "http://databinder.net/repo/org.scala-tools.sbt/launcher-interface/0.7.5/jars/launcher-interface.jar"
+        "org.scala-tools.sbt" % "launcher-interface" % "0.10.0" 
     )
   ) dependsOn (core)
 }

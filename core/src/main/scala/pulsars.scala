@@ -11,9 +11,10 @@ trait PulsingComponent {
   }
 }
 
-/**
- * A PulsingComponent has a MonitorComponent dependency
- * that will be injected into it
+/*!# PulsingComponent 
+
+A PulsingComponent has a MonitorComponent dependency
+that will be injected into it.
  */
 trait PulsingComponentImpl extends PulsingComponent {
   this: MonitorComponent =>

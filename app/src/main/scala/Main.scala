@@ -60,7 +60,10 @@ object Main {
       printHelp
     } else {
       // Standard `FileMonido` behavior  
-      val monitor = FileMonido(dir.getAbsolutePath, recurse=recursive)(command)
+      val monitor = FileMonido(dir.getAbsolutePath, recurse=recursive) {
+        case ModifiedOrCreated(f) => command(f)
+        case Deleted(path) => println("Deleted: %s" format(path))
+      }
       println("Press Enter to quit")
       Console.readLine
       monitor.kill

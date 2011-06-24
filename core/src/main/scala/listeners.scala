@@ -1,8 +1,7 @@
 package com.github.philcali
 package monido
 
-/**
-# Listeners
+/*!# Listeners
 
 Listeners are highly customizeable. I have more plans for these
 guys in the future.
