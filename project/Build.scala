@@ -2,6 +2,9 @@ import sbt._
 
 import Keys._
 import CxDocco._
+import SbtCronish._
+
+import com.github.philcali.cronish.dsl._
 
 object General {
   val settings = Defaults.defaultSettings ++ Seq (
@@ -16,8 +19,11 @@ object Monido extends Build {
   lazy val monido = Project (
     "monido",
     file("."),
-    settings = General.settings ++ doccoSettings ++ Seq (
-      doccoTitle := "Monido Monitoring Service"
+    settings = General.settings ++ doccoSettings ++ cronishSettings ++ Seq (
+      doccoTitle := "Monido Monitoring Service",
+      cronishTasks := Seq (
+        add sh "echo Take a break" runs hourly
+      )
     )
   ) aggregate (app, core)
 
