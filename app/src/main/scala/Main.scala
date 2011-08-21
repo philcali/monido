@@ -32,7 +32,7 @@ object Main {
   def doIt(args: Array[String]) {
     val help = args.contains("-h")
     val recursive = args.contains("-r")
-    val idx = args.findIndexOf(_ == "-e")
+    val idx = args.zipWithIndex.find(_._1 == "-e").map(_._2).getOrElse(0)
     val command = args.takeRight(args.size - idx).mkString(" ") match {
       case Exec(cmd) => 
         (file: File) => {
