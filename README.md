@@ -29,19 +29,25 @@ The `MonitorComponent` will simply monitor whatever it was told to monitor (The 
 reference implementation monitors the file system.) Optionally, the Monitor can notify a client 
 of a change (or anything else really) by making use of the `ListeningComponent`.
 
-
 Lots of moving parts that have arbitrary dependencies make it a great candidate for some DI.
 
-## Installation
+[cake pattern]: http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di.html
+
+## App Installation
 
 The Monido project has been conscripted, so a simple:
     
-    git clone git://github.com/philcali/monido.git; cd monido
-    sbt update publish-local
     cs philcali/monido
 
 Is all that's needed to install it. Now you can do things like:
 
     monido some/path -e ls -l
 
-[cake pattern]: http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di.html
+## Library
+
+For simple monitoring services in your app, include the `monido-core` in your build
+process:
+
+```scala
+libraryDependencies += "org.github.philcali" %% "monido-core" % "0.0.4"
+```
