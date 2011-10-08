@@ -1,4 +1,3 @@
-package com.github.philcali
 package monido
 
 trait Monido extends MonitorComponent with PulsingComponent {

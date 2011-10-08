@@ -1,4 +1,3 @@
-package com.github.philcali
 package monido
 
 import scala.actors.Actor
