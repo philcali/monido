@@ -1,18 +1,17 @@
 import sbt._
 
 import Keys._
-import CxDocco._
 
 /** Cronish stuff */
+import cronish.dsl._
 import CronishPlugin._
-import com.github.philcali.cronish.dsl._
 
 object General {
   val settings = Defaults.defaultSettings ++ Seq (
     organization := "com.github.philcali",
-    scalaVersion := "2.9.0",
-    crossScalaVersions := Seq("2.9.0-1", "2.9.0", "2.8.1", "2.8.0"),
-    version := "0.0.4",
+    scalaVersion := "2.9.1",
+    crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.8.1", "2.8.0"),
+    version := "0.1.0",
     publishTo := Some("Scala Tools Nexus" at 
                       "http://nexus.scala-tools.org/content/repositories/releases/"),
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
@@ -23,7 +22,7 @@ object Monido extends Build {
 
   lazy val specialSettings: Seq[Setting[_]] =
     General.settings ++ CronishPlugin.cronishSettings ++ Seq (
-      tasks in CronishConf := Seq (
+      cronish.tasks := Seq (
         add sh "echo Take a break" runs hourly 
       )
     )
@@ -52,7 +51,7 @@ object Monido extends Build {
     file("app"),
     settings = General.settings ++ Seq (
       libraryDependencies <+= (sbtVersion) { 
-        "org.scala-tools.sbt" % "launcher-interface_2.8.1" % _ % "provided"
+        "org.scala-tools.sbt" %% "launcher-interface" % _ % "provided"
       }
     )
   ) dependsOn (core)
