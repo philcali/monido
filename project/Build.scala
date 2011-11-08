@@ -11,7 +11,7 @@ object General {
     organization := "com.github.philcali",
     scalaVersion := "2.9.1",
     crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.8.1", "2.8.0"),
-    version := "0.1.0",
+    version := "0.1.1",
     publishTo := Some("Scala Tools Nexus" at 
                       "http://nexus.scala-tools.org/content/repositories/releases/"),
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
@@ -26,12 +26,6 @@ object Monido extends Build {
         add sh "echo Take a break" runs hourly 
       )
     )
-
-  lazy val monido = Project (
-    "monido",
-    file("."),
-    settings = specialSettings 
-  ) aggregate (app, core)
 
   lazy val core = Project (
     "monido-core",
