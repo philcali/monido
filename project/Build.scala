@@ -36,7 +36,9 @@ object Monido extends Build {
           "org.scalatest" % "scalatest" % "1.3" % "test"
         case _ =>
           "org.scalatest" %% "scalatest" % "1.6.1" % "test"
-      }
+      },
+      publishArtifact in (Compile, packageSrc) := false,
+      publishArtifact in (Compile, packageDoc) := false
     )
   )
 
