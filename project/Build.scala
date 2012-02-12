@@ -2,30 +2,47 @@ import sbt._
 
 import Keys._
 
-/** Cronish stuff */
-import cronish.dsl._
-import CronishPlugin._
-
 object General {
   val settings = Defaults.defaultSettings ++ Seq (
     organization := "com.github.philcali",
     scalaVersion := "2.9.1",
     crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.8.1", "2.8.0"),
-    version := "0.1.1",
-    publishTo := Some("Scala Tools Nexus" at 
-                      "http://nexus.scala-tools.org/content/repositories/releases/"),
-    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+    version := "0.1.2",
+    publishTo <<= version { v =>
+      val nexus = "https://oss.sonatype.org/"
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    },
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    pomIncludeRepository := { x => false },
+    pomExtra := (
+      <url>https://github.com/philcali/monido</url>
+      <licenses>
+        <license>
+          <name>The MIT License</name>
+          <url>http://www.opensource.org/licenses/mit-license.php</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:philcali/monido.git</url>
+        <connection>scm:git:git@github.com:philcali/monido.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>philcali</id>
+          <name>Philip Cali</name>
+          <url>http://philcalicode.blogspot.com/</url>
+        </developer>
+      </developers>
+    )
   )
 }
 
 object Monido extends Build {
-
-  lazy val specialSettings: Seq[Setting[_]] =
-    General.settings ++ CronishPlugin.cronishSettings ++ Seq (
-      cronish.tasks := Seq (
-        add sh "echo Take a break" runs hourly 
-      )
-    )
 
   lazy val core = Project (
     "monido-core",
@@ -36,9 +53,7 @@ object Monido extends Build {
           "org.scalatest" % "scalatest" % "1.3" % "test"
         case _ =>
           "org.scalatest" %% "scalatest" % "1.6.1" % "test"
-      },
-      publishArtifact in (Compile, packageSrc) := false,
-      publishArtifact in (Compile, packageDoc) := false
+      }
     )
   )
 

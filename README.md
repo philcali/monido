@@ -49,5 +49,5 @@ For simple monitoring services in your app, include the `monido-core` in your bu
 process:
 
 ```scala
-libraryDependencies += "org.github.philcali" %% "monido-core" % "0.0.4"
+libraryDependencies += "org.github.philcali" %% "monido-core" % "0.1.2"
 ```
